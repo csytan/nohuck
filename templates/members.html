@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+
+{% block title %}
+    <title>Members • nohuck</title>
+{% end %}
+
+
+{% block content %}
+    <div class="header">
+        <h1>Members</h1>
+    </div>
+    {% for user in users %}
+        <div class="members">
+            <a href="/@{{ user.key.id() }}">
+                {{ user.name }} <strong>{{ user.karma }}</strong>
+            </a>
+        </div>
+    {% end %}
+{% end %}
+

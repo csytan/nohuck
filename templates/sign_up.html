@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+
+{% block title %}
+    <title>Sign Up • nohuck</title>
+{% end %}
+
+
+{% block script %}
+    <script>
+        $(function(){
+            $('#username').keyup(function(){
+                $('#bot').val('');
+            });
+        });
+    </script>
+{% end %}
+
+
+{% block content %}
+    <div class="header">
+        <h1>
+            Sign Up <small>(or <a href="/login">Login</a>)</small>
+        </h1>
+    </div>
+    
+    <form method="post">
+        {% raw xsrf_form_html() %}
+        <input id="bot" type="hidden" name="bot" value="true">
+        <label>Username</label>
+        <input id="username" class="text_input short" type="text"
+            pattern="[a-z0-9\-_]{3,20}"
+            name="username" placeholder="Username" maxlength="20" required>
+        <label>Password</label>
+        <input class="text_input short" type="password" name="password" placeholder="Password" required>
+        <input class="btn" type="submit" value="Sign Up">
+    </form>
+{% end %}

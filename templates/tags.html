@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+
+{% block title %}
+    <title>Tags • nohuck</title>
+{% end %}
+
+
+{% block script %}
+    <script>
+        $(function(){
+            $(document).on('click', '.edit_tag_form .btn', function(){
+                $form = $(this).addClass('loading')
+                    .val('Saving...')
+                    .closest('form');
+                $.post('', $form.serialize(), function(html){
+                    $('#content')
+                        .replaceWith($(html).find('#content'));
+                });
+                return false;
+            });
+        });
+    </script>
+{% end %}
+
+
+{% block content %}
+    <div class="header">
+        <h1>Tags</h1>
+    </div>
+    {% set first_letter = None %}
+    {% for tag in tags %}
+        {% set tag_name = tag[0] %}
+        {% if tag_name[0] != first_letter and len(tags) >= 20 %}
+            <h2 class="tag_group {% if first_letter is None %}first{% end %}">
+                {{ tag_name[0].upper() }}
+            </h2>
+            {% set first_letter = tag_name[0] %}
+        {% end %}
+
+        <div class="tag_block hover_edit_btn">
+            <a class="tag large"
+                href="{% raw link(tags=[tag_name]) %}"
+                title="{{ tag_name }}">
+                {{ tag_name }}
+                <span class="n_vids">{{ tag[1] }}</span>
+            </a>
+            {% if authorized('moderate') %}
+                <a class="edit_btn">edit</a>
+                <form class="edit_tag_form edit_form" method="post">
+                    {% raw xsrf_form_html() %}
+                    <span class="close_form">×</span>
+                    <input type="hidden" name="action" value="edit_tag">
+                    <input type="hidden" name="tag" value="{{ tag_name }}">
+                    <input class="text_input" type="text" name="new_tag" value="{{ tag_name }}">
+                    <input class="btn mini" type="submit" value="Save">
+                    <input class="btn mini action_btn" type="submit" value="Remove"
+                        data-action="remove_tag"
+                        data-confirm="Remove tag?">
+                </form>
+            {% end %}
+        </div>
+    {% end %}
+{% end %}

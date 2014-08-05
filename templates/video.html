@@ -1,0 +1,284 @@
+{% extends "base.html" %}
+
+
+{% block title %}
+    <title>{{ video['title'] }} • nohuck</title>
+{% end %}
+
+
+{% block style %}
+    <link rel="image_src" href="{{ video['thumbnail'] }}">
+{% end %}
+
+
+{% block script %}
+    <script>
+        $(function(){
+            var xsrf = '{{ handler.xsrf_token }}';
+            var vid_id = '{{ video['video_ids'][0] }}';
+            var all_tags = {% raw json_encode(all_tags) %};
+
+            $('.tag_search').tagSuggest(all_tags);
+
+            $('.comment_tab').one('click', function(){
+                fetchRedditArticles(vid_id);
+            });
+
+            $('.vid_parts a').click(function(){
+                $(this).parent().find('a').removeClass('active');
+                var src = $(this).addClass('active').data('src');
+                $('.vid_player iframe').attr('src', src);
+                return false;
+            });
+
+            $('.like_btn').click(function(){
+                var canVote = true || !$(this).hasClass('liked') || $(this).hasClass('admin');
+                var inner = $(this).addClass('liked').find('.inner');
+                var n_letters = inner.find('.letter').length;
+                var delay = 800 / n_letters;
+
+                if (canVote) $.post('', {_xsrf: xsrf, action: 'like'});
+
+                for (var i=0; i < n_letters; i++){
+                    inner.animate({top: '-=60px'}, 20)
+                        .delay(delay);
+                }
+                inner.queue(function(next){
+                        if (canVote){
+                            var n = $(this).find('.n');
+                            n.text(parseInt(n.text()) + 1);
+                            $(this).find('.singular').hide()
+                                .end()
+                                .find('.plural').show();
+                        }
+                        next();
+                    })
+                    .animate({top: 0}, 100);
+                return false;
+            });
+
+            $('.flag_btn').click(function(){
+                $.post('', {_xsrf: xsrf, action: 'flag'}, function(){
+                    $n = $('.like_btn .n');
+                    $n.text(parseInt($n.text()) -1);
+                });
+                return false;
+            });
+
+
+            $('#content').on('click', '.save_tags', function(){
+                $(this).addClass('loading').val('Saving...');
+                var data = $(this).closest('form').serialize();
+                $.post('', data, function(html){
+                    $('.vid_tags')
+                        .replaceWith($(html).find('.vid_tags'));
+                    $('.tag_search').tagSuggest(all_tags);
+                });
+                return false;
+            });
+
+
+            $('#comments').on('click', '.reply', function(){
+                var form = $(this).parent().find('.reply_form:visible');
+                if (form.length){
+                    form.hide();
+                    return false;
+                }
+
+                $('#comments .reply_form')
+                    .find('.reply_to')
+                    .val($(this).data('reply_to'))
+                    .end()
+                    .appendTo($(this).parent())
+                    .show()
+                    .find('.text_input')
+                    .focus();
+                return false;
+            });
+
+            function fetchRedditArticles(query){
+                var url = 'http://www.reddit.com/search.json?syntax=plain&sort=top'+
+                    '&q=%22' + query + '%22&jsonp=?';
+                $.getJSON(url, function(data){
+                    var articles = data.data.children;
+                    articles.sort(function(a, b){
+                        return b.data.num_comments - a.data.num_comments;
+                    });
+
+                    if (articles.length){
+                        var html = '';
+                        for (var i=0, article; article=articles[i]; i++){
+                            if (!article.data.num_comments) continue;
+                            html +=
+                            '<div class="article">' +
+                                '<a href="http://www.reddit.com' + article.data.permalink +
+                                    '" target="_blank">' +
+                                    article.data.title +
+                                '</a><br>' +
+                                '<span>' + article.data.num_comments + ' comments</span>' +
+                            '</div>';
+                        }
+                    }
+                    if (html){
+                        $('#comments').append('<h3>Via Reddit</h3>' + html);
+                    }
+                });
+            }
+        });
+    </script>
+{% end %}
+
+
+{% block content %}
+    <div class="header">
+        {% if selected_tags or len(video['video_ids']) > 1 %}
+            {% if selected_tags %}
+                <div class="selected_tags">
+                    {% include "_selected_tags.html" %}
+                </div>
+            {% end %}
+
+            {% if len(video['video_ids']) > 1 %}
+                <div class="vid_parts">
+                    {% for i, id in enumerate(video['video_ids']) %}
+                        <a class="tag large {% if i == 0 %}active{% end %}"
+                            title="Part {{ i + 1 }}"
+                            data-src="{{ embed_src(id, video['video_type']) }}">
+                            {{ i + 1 }}
+                        </a>
+                    {% end %}
+                </div>
+            {% end %}
+            <div class="clearfix"></div>
+        {% end %}
+    </div>
+    <div class="vid_player">
+        <iframe src="{{ embed_src(video['video_ids'][0], video['video_type']) }}" frameborder="0" allowfullscreen></iframe>
+    </div>
+    <div class="vid_info hover_edit_btn">
+        <div class="like_btn {% if liked %}liked{% end %} {% if current_user and current_user.get('is_admin') %}admin{% end %}">
+            <div class="inner">
+                <div class="likes">
+                    <div class="n">{{ video['points'] }}</div>
+                    <div class="singular" {% if video['points'] != 1 %}style="display:none"{% end %}>
+                        huck
+                    </div>
+                    <div class="plural" {% if video['points'] == 1 %}style="display:none"{% end %}>
+                        hucks
+                    </div>
+                </div>
+                {% for c in 'huck' %}
+                    <div class="letter">{{ c }}</div>
+                {% end %}
+            </div>
+        </div>
+
+        <h1>{{ video['title'] }}</h1>
+        <div class="info">
+            {{ video['points'] }}
+            {{ 'point' if video['points'] == 1 else 'points' }}
+            {% if video['user_id'] %}
+                by <a href="/@{{ video['user_id'] }}">{{ video['user_id'] }}</a>
+            {% elif video['feed'] and False %}
+                via
+                <a href="{{ video['feed.get().url'] }}" rel="nofollow" target="_blank">
+                    {{ video['feed.get().name'] }}
+                </a>
+            {% end %}
+
+            {{ relative_date(video['created']) }}
+
+            {% if authorized('moderate') %}
+                | <a href="#" class="flag_btn">flag</a>
+            {% end %}
+            {% if authorized('edit_video') %}
+                | <a href="{{ link(vid_id=str(video['id']) + '/edit') }}">edit</a>
+            {% end %}
+        </div>
+
+        <div class="vid_tags">
+            {% for tag in video['tags'] %}
+                <a class="tag mini"
+                    href="{% raw link(tags=[tag]) %}"
+                    title="{{ tag }}">
+                    {{ tag }}
+                    <span class="n_vids">{{ all_tags[tag] }}</span>
+                </a>
+            {% end %}
+            {% if current_user and video['tags'] %}
+                <span class="edit_btn">edit</span>
+            {% end %}
+
+            <form class="edit_form" method="post"
+                {% if current_user and not video['tags'] %}style="display:block"{% end %}>
+                {% raw xsrf_form_html() %}
+                <span class="close_form">×</span>
+                <input type="hidden" name="action" value="edit_tags">
+                <div class="tag_search_selected">
+                    {% for tag in video['tags'] %}
+                        <a class="tag mini" data-tag="{{ tag }}">
+                            {{ tag }}
+                            <span class="close">×</span>
+                        </a>
+                    {% end %}
+                </div>
+                <input class="tag_search text_input" type="text" placeholder="Add Tags">
+                <div class="tag_search_results"></div>
+                <input class="tag_search_hidden" type="hidden" name="tags">
+
+                {% if video['suggested_tags'] %}
+                    <div class="tag_search_suggested">
+                        <h3>Suggested:</h3>
+                        {% for tag in video['suggested_tags'] %}
+                            <div class="tag mini">{{ tag }}</div>
+                        {% end %}
+                    </div>
+                {% end %}
+                <input class="btn mini save_tags" type="submit" value="Save Changes">
+            </form>
+        </div>
+    </div>
+
+    <div class="tabs">
+        <a class="tab comment_tab {% if comments %}active{% end %}" href="#comments">
+            Comments {% if video['n_comments'] %}({{ video['n_comments'] }}){% end %}
+        </a>
+        <a class="tab {% if not comments %}active{% end %}" href="#playlist">
+            Playlist
+        </a>
+        <a class="tab" href="#about">
+            About
+        </a>
+        <div class="clearfix"></div>
+    </div>
+
+    <div id="comments" class="tab_content" {% if comments %}style="display:block"{% end %}>
+        {% if current_user %}
+            <form class="comment_form" method="post">
+                {% raw xsrf_form_html() %}
+                <input type="hidden" name="action" value="comment">
+                <textarea class="text_input" name="text" placeholder="Add a comment"></textarea>
+                <input class="btn mini" type="submit" value="Comment">
+            </form>
+            <form class="reply_form" method="post">
+                {% raw xsrf_form_html() %}
+                <input type="hidden" name="action" value="comment">
+                <input class="reply_to" type="hidden" name="reply_to">
+                <textarea class="text_input" name="text" placeholder="Add a reply"></textarea>
+                <input class="btn mini" type="submit" value="Reply">
+            </form>
+        {% end %}
+        {% raw handler.render_comments(comments) %}
+    </div>
+
+    <div id="playlist" class="tab_content" {% if not comments %}style="display:block;"{% end %}>
+        {% for vid in playlist %}
+            {% include "_vid_item.html" %}
+        {% end %}
+        <div class="clearfix"></div>
+    </div>
+
+    <div id="about" class="tab_content">
+        {% raw htmlify(video['text']) %}
+    </div>
+{% end %}

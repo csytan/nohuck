@@ -1,0 +1,22 @@
+{% for comment in comments %}
+    <div class="comment {% if nest %}nest nest_{{ nest }}{% end %}">
+        <div class="comment_inner">
+            <div class="info">
+                <a href="/@{{ comment['user_id'] }}">{{ comment['user_id'] }}</a>
+                {% if comment['points'] > 1 %}
+                    {{ comment['points'] }} points,
+                {% end %}
+                {{ relative_date(comment['created']) }}
+            </div>
+            <div class="text">
+                {% raw htmlify(comment['text']) %}
+                {% if current_user %}
+                    <a class="reply" data-reply_to="{{ comment['id'] }}" href="#">
+                        &nbsp;— Reply
+                    </a>
+                {% end %}
+            </div>
+        </div>
+        {% raw handler.render_comments(comment['replies'], nest + 1) %}
+    </div>
+{% end %}

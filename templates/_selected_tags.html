@@ -1,0 +1,15 @@
+{% if 'video' in globals() %}
+    <a class="tag large" href="{% raw link(tags=selected_tags, query={'sort': sort}) %}">
+        ←
+    </a>
+{% end %}
+{% if 'selected_tags' in globals() %}
+	{% for tag in selected_tags %}
+	    <a class="tag large" 
+	        href="{% raw link(tags=selected_tags, exclude_tag=tag, query={'sort': sort}) %}"
+	        title="{{ tag }}">
+	        {{ tag }}
+	        <span class="close">×</span>
+	    </a>
+	{% end %}
+{% end %}

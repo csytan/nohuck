@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+
+{% block title %}
+    <title>Login • nohuck</title>
+{% end %}
+
+
+{% block content %}
+    <div class="header">
+        <h1>
+            Login <small>(or <a href="/sign_up">Sign Up</a>)</small>
+        </h1>
+    </div>
+    
+    <form method="post">
+        {% raw xsrf_form_html() %}
+        <label>Username</label>
+        <input class="text_input short" type="text" name="username" placeholder="Username" maxlength="20" required>
+        <label>Password</label>
+        <input class="text_input short" type="password" name="password" placeholder="Password" required>
+        <input class="btn" type="submit" value="Login">
+    </form>
+{% end %}

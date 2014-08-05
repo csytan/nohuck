@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+
+{% block title %}
+    <title>About • nohuck</title>
+{% end %}
+
+
+{% block content %}
+    <div class="header">
+        <h1>About</h1>
+    </div>
+
+    <div class="tabs">
+        <a class="tab active" href="#about">
+            About
+        </a>
+        <a class="tab" href="#members">
+            Members
+        </a>
+        <div class="clearfix"></div>
+    </div>
+
+    {% if authorized('moderate') %}
+        <form id="about" class="tab_content" style="display:block" method="post">
+            {% raw xsrf_form_html() %}
+            <label>Message of the Day</label>
+            <input class="text_input" type="text" name="motd" value="{{ settings['motd'] }}">
+            <label>About the group</label>
+            <textarea class="text_input" name="about" rows="6">{{ settings['about'] }}</textarea>
+            <input class="btn" type="submit" value="Save Changes">
+        </form>
+    {% else %}
+        <div id="about" class="tab_content" style="display:block">
+            {% raw htmlify(settings['about']) %}
+        </div>
+    {% end %}
+
+    <ul id="members" class="tab_content big_list">
+        {% for user in users %}
+            <li>
+                <a href="/@{{ user['id'] }}">
+                    {{ user['id'] }} <small>{{ user['karma'] }}</small>
+                </a>
+            </li>
+        {% end %}
+    </ul>
+{% end %}

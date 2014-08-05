@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+    {% block title %}
+        <title>nohuck!</title>
+    {% end %}
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="shortcut icon" href="/static/favicon.ico">
+    <link href="http://fonts.googleapis.com/css?family=Open+Sans:400,600,700" rel="stylesheet" type="text/css">
+    <link type="text/css" href="/static/style.css" rel="stylesheet">
+    {% block style %}{% end %}
+</head>
+
+<body>
+    <div id="mobile_header">
+        <div class="menu">
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+        </div>
+        <a class="logo" href="/">nohuck</a>
+    </div>
+
+    <div class="container">
+        <div id="sidebar">
+            <div class="header">
+                <a class="logo {% if False and motd %}show_motd{% end %}"
+                    href="/">
+                    nohuck
+                </a>
+                <div class="motd">{{ motd }}</div>
+            </div>
+            <div class="nav">
+                <a href="/" class="mobile">home</a>
+
+                {% if current_user %}
+                    <a href="/@{{ current_user['id'] }}">
+                        {{ current_user['id'] }} <strong>{{ current_user['karma'] }}</strong>
+                    </a>
+                    <a href="/submit">
+                        submit
+                    </a>
+                    <a href="/about">
+                        about
+                    </a>
+                    <a href="/feeds">
+                        feeds
+                    </a>
+                    <a href="/logout">logout</a>
+                {% else %}
+                    <a href="/about">
+                        about
+                    </a>
+                    <a href="/feeds">
+                        feeds
+                    </a>
+                    <a href="/login{% if handler.request.path != '/' %}{{ '?next=' + handler.request.path }}{% end %}">
+                        login
+                    </a>
+                {% end %}
+
+                <iframe class="facebook"
+                    src="//www.facebook.com/plugins/like.php?href=http%3A%2F%2Fwww.facebook.com%2Fnohuckvideos&amp;send=false&amp;layout=button_count&amp;width=90&amp;show_faces=false&amp;font&amp;colorscheme=light&amp;action=like&amp;height=21"
+                    scrolling="no" frameborder="0" allowTransparency="true">
+                </iframe>
+
+                <div class="divider"></div>
+                
+                {% for tag in top_tags[:10] %}
+                    <a href="{% raw link(tags=[tag[0]]) %}">
+                        {{ tag[0] }}
+                        <span class="n_vids">{{ tag[1] }}</span>
+                    </a>
+                {% end %}
+                {% if len(top_tags) > 10 %}
+                    <a href="/tags">more tags...</a>
+                {% end %}
+            </div>
+        </div>
+        <div id="content">
+            {% set message = handler.clear_message() %}
+            {% if message %}
+                <div class="message">{{ message }}</div>
+            {% end %}
+            {% block content %}{% end %}
+            <div class="clearfix"></div>
+        </div>
+    </div>
+
+    <script type="text/javascript" src="/static/script.js"></script>
+    {% block script %}{% end %}
+    <script type="text/javascript">
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-7675976-1']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+    </script>
+</body>
+
+</html>

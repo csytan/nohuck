@@ -1,0 +1,38 @@
+<div class="vid_item">
+    <a class="thumb" style="background-image:url({{ vid['thumbnail'] }})"
+        href="{% raw link(tags=selected_tags, vid_id=vid['id'], query={'sort': sort}) %}">
+    </a>
+    <div class="deets">
+        <a class="title"
+            title="{{ vid['title'] }}"
+            href="{% raw link(tags=selected_tags, vid_id=vid['id'], query={'sort': sort}) %}">
+            {{ vid['title'] }}
+        </a>
+        <div class="submitted">
+            {% if vid['points'] > 1 %}
+                {{ vid['points'] }} points
+            {% else %}
+                submitted
+            {% end %}
+            <span class="more">
+                {% if vid['user_id'] %}
+                    by <a href="/@{{ vid['id'] }}">{{ vid['user_id'] }}</a>
+                {% elif vid['feed'] %}
+                    via
+                    <a href="/feeds" rel="nofollow" target="_blank">
+                        {{ vid['feed'] }}
+                    </a>
+                {% end %}
+            </span>
+            {{ relative_date(vid['created']) }}
+            <span class="more">
+                {% if vid['n_comments'] == 1 %}
+                    - 1 comment
+                {% elif vid['n_comments'] > 1 %}
+                    - {{ vid['n_comments'] }} comments
+                {% end %}
+            </span>
+        </div>
+    </div>
+    <div class="clearfix"></div>
+</div>

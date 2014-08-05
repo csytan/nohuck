@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+
+{% block title %}
+    <title>{% if video %}Edit Video{% else %}Submit Video{% end %} • nohuck</title>
+{% end %}
+
+
+{% block script %}
+    <script>
+        $(function(){
+            var youtube_re = /youtube\.com\/watch\?\S*v=([\w\-]+)/;
+            var youtube_re2 = /youtu\.be\/([\w\-]+)/;
+            var vimeo_re = /vimeo\.com\/(\d+)/;
+
+            $('#urls').focus()
+                .bind('paste keyup blur', function(){
+                    var youtube = youtube_re.exec(this.value);
+                    var youtube2 = youtube_re2.exec(this.value);
+                    var vimeo = vimeo_re.exec(this.value);
+
+                    if ($('#title').val() || $('#text').val()) return;
+
+                    if (youtube || youtube2){
+                        var youtube = youtube ? youtube[1] : youtube2[1];
+                        var url = 'http://gdata.youtube.com/feeds/api/videos/' + youtube + '?v=2&alt=jsonc&callback=?';
+                        $.getJSON(url, function(data){
+                            var title = data.data.title;
+                            var text = data.data.description;
+                            $('#title').val(title);
+                            $('#text').val(text);
+                        });
+                    } else if (vimeo){
+                        var url = 'http://vimeo.com/api/v2/video/' + vimeo[1] + '.json?callback=?';
+                        $.getJSON(url, function(data){
+                            data = data[0];
+                            var title = data.title;
+                            var text = data.description.replace(/<br\s?\/>/g, '');
+                            $('#title').val(title);
+                            $('#text').val(text);
+                        });
+                    }
+                });
+
+
+            $('.btn.remove').click(function(){
+                if (confirm('Are you sure you want to remove this video?')){
+                    $(this).closest('form')
+                        .find('input[name="action"]')
+                        .val('remove');
+                } else {
+                    return false;
+                }
+            });
+        });
+    </script>
+{% end %}
+
+
+{% block content %}
+    <div class="header">
+        <h1>Submit Video</h1>
+        {% set message = handler.get_argument('message', None) %}
+        {% if message == 'missing_url' %}
+            <div id="message" class="error">Please enter a URL!</div>
+        {% elif message == 'missing_title' %}
+            <div id="message" class="error">Please enter a title!</div>
+        {% elif message == 'not_found' %}
+            <div id="message" class="error">Hey, we couldn't find the video. Please check that it's correct or try again later!</div>
+        {% end %}
+    </div>
+
+    <form method="post">
+        {% raw xsrf_form_html() %}
+        <input type="hidden" name="action" value="save">
+        <label>YouTube or Vimeo URL(s)</label>
+        <textarea id="urls" class="text_input" name="urls" rows="2">{% if video %}{% for id in video['video_ids'] %}
+            {{ 'http://youtube.com/watch?v=' + id if video['video_type'] == 'youtube' else 'http://vimeo.com/' + id }}{% end %}{% end %}</textarea>
+        <label>Title</label>
+        <input id="title" class="text_input" type="text" name="title" {% if video %}value="{{ video['title'] }}"{% end %}>
+        <label>Description (optional)</label>
+        <textarea id="text" class="text_input" name="text" rows="6">{% if video %}{{ video['text'] }}{% end %}</textarea>
+        {% if video %}
+            <input class="btn" type="submit" value="Save changes">
+            <input class="btn remove" type="submit" value="Remove video">
+        {% else %}
+            <input class="btn" type="submit" value="Submit Video">
+        {% end %}
+    </form>
+{% end %}

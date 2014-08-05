@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+
+{% block title %}
+    <title>{{ user['id'] }} • nohuck</title>
+{% end %}
+
+
+{% block content %}
+    <div class="header">
+        <h1>
+            {{ user['id'] }} ({{ user['karma'] }})
+        </h1>
+    </div>
+    <div class="user_info">
+        Joined {{ relative_date(user['created']) }}
+    </div>
+    <div class="tabs">
+        <a class="tab active" href="#about">
+            About
+        </a>
+        <a class="tab" href="#submitted">
+            Submitted
+        </a>
+        <a class="tab" href="#favorites">
+            Favorites
+        </a>
+        {% if current_user and current_user['id'] == user['id'] %}
+            <a class="tab" href="#settings">
+                Settings
+            </a>
+        {% end %}
+        <div class="clearfix"></div>
+    </div>
+
+    <div id="about" class="tab_content" style="display:block">
+        {% if current_user and current_user['id'] == user['id'] %}
+            <form method="post">
+                {% raw xsrf_form_html() %}
+                <input type="hidden" name="action" value="about">
+                <textarea class="text_input" name="about" rows="6">{% if user['about'] %}{{ user['about'] }}{% end %}</textarea>
+                <input class="btn" type="submit" value="Save Changes">
+            </form>
+        {% else %}
+            {% raw htmlify(user['about']) %}
+        {% end %}
+    </div>
+
+    {% set selected_tags = [] %}
+    {% set sort = None %}
+    <div id="submitted" class="tab_content">
+        {% for vid in submitted %}
+            {% include "_vid_item.html" %}
+        {% end %}
+    </div>
+
+    <div id="favorites" class="tab_content">
+        {% for vid in favorites %}
+            {% include "_vid_item.html" %}
+        {% end %}
+    </div>
+
+    <div id="settings" class="tab_content">
+        <form method="post">
+            {% raw xsrf_form_html() %}
+            <input type="hidden" name="action" value="settings">
+            <label>Change Password</label>
+            <input class="text_input" type="password" name="password" placeholder="Password">
+            <label>Repeat Password</label>
+            <input class="text_input" type="password" name="password_repeat" placeholder="Repeat Password">
+            <input class="btn" type="submit" value="Save Changes">
+        </form>
+    </div>
+{% end %}

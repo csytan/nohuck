@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+
+{% block title %}
+    <title>Feeds • nohuck</title>
+{% end %}
+
+
+{% block script %}
+    <script type="text/javascript">
+        $(function(){
+            $('.edit_feed_btn').click(function(){
+                $.each($(this).data(), function(key, value){
+                    $('input[name="' + key + '"]').val(value);
+                });
+                $('.tab.edit')
+                    .show()
+                    .click();
+                return false;
+            });
+
+            $('.remove_btn').click(function(){
+                if (confirm('Are you sure you want to remove this feed?')){
+                    $(this).closest('form')
+                        .find('input[name="action"]')
+                        .val('remove');
+                } else {
+                    return false;
+                }
+            });
+        });
+    </script>
+{% end %}
+
+
+{% block style %}
+    <style>
+        .feed {
+            display: block;
+            color: #777;
+            margin-bottom: 5px;
+        }
+        .add_feed_btn {
+            margin-top: 14px;
+        }
+    </style>
+{% end %}
+
+
+{% block content %}
+    <div class="header">
+        <h1>Feeds</h1>
+    </div>
+
+    <div class="tabs">
+        <a class="tab active" href="#feeds">
+            Subscribed
+        </a>
+        {% if authorized('moderate') %}
+            <a class="tab edit" style="display:none" href="#edit_feed">
+                Edit Feed
+            </a>
+            <a class="tab" href="#add_feed">
+                Add Feed
+            </a>
+        {% end %}
+        <div class="clearfix"></div>
+    </div>
+
+    <div id="feeds" class="tab_content" style="display:block">
+        {% for feed in feeds %}
+            <div class="feed">
+                <a href="{{ feed['url'] }}" target="_blank" rel="nofollow">
+                    {{ feed['id'] }}
+                </a>
+                {% if authorized('moderate') %}
+                    <span class="edit_feed_btn edit_btn"
+                        data-feed_id="{{ feed['id'] }}"
+                        data-new_id="{{ feed['id'] }}"
+                        data-url="{{ feed['url'] }}">
+                        edit
+                    </span>
+                {% end %}
+            </div>
+        {% end %}
+    </div>
+
+    <form id="edit_feed" class="tab_content" method="post">
+        {% raw xsrf_form_html() %}
+        <input class="action" type="hidden" name="action" value="edit">
+        <input type="hidden" name="feed_id">
+        <label>Name</label>
+        <input class="text_input" type="text" name="new_id" placeholder="/r/ultimate">
+        <label>URL</label>
+        <input class="text_input" type="text" name="url" placeholder="http://www.reddit.com/r/ultimate">
+        <input class="btn edit" type="submit" value="Save Feed">
+        <input class="btn edit remove_btn" type="submit" value="Remove Feed">
+    </form>
+
+    <form id="add_feed" class="tab_content" method="post">
+        {% raw xsrf_form_html() %}
+        <input class="action" type="hidden" name="action" value="create">
+        <label>Name</label>
+        <input class="text_input" type="text" name="feed_id" placeholder="/r/ultimate">
+        <label>URL</label>
+        <input class="text_input" type="text" name="url" placeholder="http://www.reddit.com/r/ultimate">
+        <input class="btn add" type="submit" value="Add Feed">
+    </form>
+{% end %}

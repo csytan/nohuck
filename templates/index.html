@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+    {% if selected_tags %}
+        <div class="header">
+            {% include "_selected_tags.html" %}
+            <div class="clearfix"></div>
+        </div>
+
+        <div class="filter_nav">
+            <div class="sort">
+                <h3>Sort by</h3>
+                <a {% if sort == 'new' %}class="active"{% end %}
+                    href="{% raw link(tags=selected_tags, query={'sort': 'new'}) %}">
+                    new
+                </a>
+                &nbsp;•&nbsp;
+                <a {% if sort == 'hot' %}class="active"{% end %}
+                    href="{% raw link(tags=selected_tags) %}">
+                    hot
+                </a>
+                &nbsp;•&nbsp;
+                <a {% if sort == 'top' %}class="active"{% end %}
+                    href="{% raw link(tags=selected_tags, query={'sort': 'top'}) %}">
+                    top
+                </a>
+            </div>
+            {% if len(videos) > 4 and filter_tags %}
+                <h3>Filter by</h3>
+                {% for tag, n_vids in filter_tags_top %}
+                    <a class="tag"
+                        href="{% raw link(tags=selected_tags + [tag], query={'sort': sort}) %}"
+                        title="{{ tag }}">
+                        {{ tag }}
+                        <span class="n_vids">{{ n_vids }}</span>
+                    </a>
+                {% end %}
+                {% if len(filter_tags) > len(filter_tags_top) %}
+                    <a class="more_tags">
+                        ...
+                    </a>
+                {% end %}
+
+                {% set tot_tags = len(filter_tags) %}
+                {% if tot_tags < 10 %}
+                    {% set tag_groups = [filter_tags] %}
+                {% else %}
+                    {% set mid = int(round(tot_tags / 2.0)) %}
+                    {% set tag_groups = [filter_tags[:mid], filter_tags[mid:]] %}
+                {% end %}
+                <div class="expand" style="display:none">
+                    {% for tags in tag_groups %}
+                        <div class="tag_group">
+                            {% for tag, n_vids in tags %}
+                                <a class="tag mini"
+                                    href="{% raw link(tags=selected_tags + [tag], query={'sort': sort}) %}"
+                                    title="{{ tag }}">
+                                    {{ tag }}
+                                    <span class="n_vids">{{ n_vids }}</span>
+                                </a>
+                                <br>
+                            {% end %}
+                        </div>
+                    {% end %}
+                </div>
+            {% end %}
+            <div class="clearfix"></div>
+        </div>
+    {% else %}
+        <div class="header">
+            <div class="sort_nav">
+                <a {% if sort == 'new' %}class="active"{% end %}
+                    href="{% raw link(query={'sort': 'new'}) %}">
+                    new
+                </a>
+                •
+                <a {% if sort == 'hot' %}class="active"{% end %}
+                    href="{% raw link() %}">
+                    hot
+                </a>
+                •
+                <a {% if sort == 'top' %}class="active"{% end %}
+                    href="{% raw link(query={'sort': 'top'}) %}">
+                    top
+                </a>
+            </div>
+        </div>
+    {% end %}
+
+    <div class="videos">
+        {% for vid in videos %}
+            {% include "_vid_item.html" %}
+        {% end %}
+    </div>
+
+    {% if next_page %}
+        <a class="next_page"
+            href="{% raw link(tags=selected_tags, query={'page': next_page, 'sort': sort}) %}">
+            more videos »
+        </a>
+    {% end %}
+{% end %}
