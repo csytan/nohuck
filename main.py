@@ -293,6 +293,7 @@ class Video(BaseHandler):
             raise tornado.web.HTTPError(404)
 
         sort = self.get_argument('sort', None)
+        sort = sort if sort in ('new', 'top') else 'hot'
         tags = self.parse_tag_slug(tag_slug)
 
         playlist = db.videos_fetch(tags, sort, after=video['id'])

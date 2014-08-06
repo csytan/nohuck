@@ -5,7 +5,7 @@
     <div class="deets">
         <a class="title"
             title="{{ vid['title'] }}"
-            href="{% raw link(tags=selected_tags, vid_id=vid['id'], query={'sort': sort}) %}">
+            href="{% raw link(tags=selected_tags, vid_id=vid['id'], query={'sort': sort if sort != 'hot' else None}) %}">
             {{ vid['title'] }}
         </a>
         <div class="submitted">
