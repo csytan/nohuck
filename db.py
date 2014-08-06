@@ -104,7 +104,8 @@ def users_fetch():
 
 
 ### Videos ###
-def video_create(title, text, thumbnail, video_ids, video_type, ip_likes=[], user_likes=[], user_id=None, feed=None):
+def video_create(title, text, thumbnail, video_ids, video_type, 
+    points=1, ip_likes=[], user_likes=[], user_id=None, feed=None):
     video = {
         'id': generate_id(),
         'created': datetime.datetime.now(utc),
@@ -122,7 +123,7 @@ def video_create(title, text, thumbnail, video_ids, video_type, ip_likes=[], use
         'user_dislikes': [],
         'thumbnail': thumbnail,
         'n_comments': 0,
-        'points': 0,
+        'points': points,
         'score': 0,
         'top_score': 0
     }
@@ -365,6 +366,7 @@ def feeds_update(n=1):
             datum = video_data[0]
             video = video_create(
                 feed=feed_id,
+                points=0,
                 title=datum['title'],
                 thumbnail=datum['thumbnail'],
                 text=datum['description'],
