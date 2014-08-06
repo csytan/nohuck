@@ -16,7 +16,7 @@
         $(function(){
             var xsrf = '{{ handler.xsrf_token }}';
             var vid_id = '{{ video['video_ids'][0] }}';
-            var all_tags = {% raw json_encode(all_tags) %};
+            var all_tags = {% raw json_encode(all_tags.keys()) %};
 
             $('.tag_search').tagSuggest(all_tags);
 
