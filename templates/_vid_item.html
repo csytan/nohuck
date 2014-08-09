@@ -16,7 +16,7 @@
             {% end %}
             <span class="more">
                 {% if vid['user_id'] %}
-                    by <a href="/@{{ vid['id'] }}">{{ vid['user_id'] }}</a>
+                    by <a href="/{{ vid['id'] }}">{{ vid['user_id'] }}</a>
                 {% elif vid['feed'] %}
                     via
                     <a href="/feeds" rel="nofollow" target="_blank">
