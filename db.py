@@ -80,6 +80,15 @@ def user_save(user):
         .run())['new_val']
 
 
+def user_add_karma(id):
+    logging.error(id)
+    return logging.info(db.table('users')
+        .get(id)
+        .update({'karma': r.row['karma'].add(1)}, return_vals=True)
+        .run()
+        ['new_val']['karma'])
+
+
 def user_hash_password(raw_password, n_iter=10000):
     assert len(raw_password) > 0 and len(raw_password) <= 20
     salt = str(uuid.uuid4()).replace('-', '')

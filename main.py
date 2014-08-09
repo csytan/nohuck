@@ -339,16 +339,21 @@ class Video(BaseHandler):
 
         action = self.get_argument('action', None)
         if action == 'like':
-            ip = self.request.remote_ip
-            # TODO: clean this up
-            if (not self.current_user or self.current_user['id'] not in video['user_likes']) and \
-                ip not in video['ip_likes'] or \
-                (self.current_user and self.current_user['id'] in ('csytan', 'sloepink')):
+            user_can_vote = (self.current_user and 
+                self.current_user['id'] not in video['user_likes'])
+            anon_can_vote = (self.request.remote_ip not in video['ip_likes'])
+            mod_can_vote = (self.current_user and 
+                self.current_user['id'] in ('csytan', 'sloepink'))
+            if user_can_vote or mod_can_vote or anon_can_vote:
                 if self.current_user:
                     video['user_likes'].append(self.current_user['id'])
-                video['ip_likes'].append(ip)
+                    video['user_likes'] = list(set(video['user_likes']))
+                video['ip_likes'].append(self.request.remote_ip)
+                video['ip_likes'] = list(set(video['ip_likes']))
                 video['points'] += 1
                 db.video_save(video)
+                if self.current_user and video['user_id'] and video['points'] < 10:
+                    db.user_add_karma(video['user_id'])
             return self.write('1')
         elif action == 'flag':
             self.authorize('moderate')
@@ -450,7 +455,7 @@ class AddOrEditVideo(BaseHandler):
                 user_id=self.current_user['id'],
                 ip_likes=[self.request.remote_ip],
                 **params)
-            #self.current_user.add_karma(2)
+            db.user_add_karma(1)
         self.redirect(self.link(vid_id=video['id']))
 
 
