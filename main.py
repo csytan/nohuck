@@ -499,7 +499,7 @@ class GitHubHook(BaseHandler):
         self.write('1')
     
     def check_xsrf_cookie(self):
-        # Skip xsrf check
+        pass
 
 
 routes = [
