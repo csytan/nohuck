@@ -495,7 +495,10 @@ class GitHubHook(BaseHandler):
     def post(self):
         # TODO: add hash verification
         logging.info(str(self.request))
-        subprocess.call('git pull && sudo restart nohuck', shell=True)
+        subprocess.call(
+            'git pull && sudo restart nohuck',
+            shell=True,
+            cwd=os.getcwd())
         self.write('1')
     
     def check_xsrf_cookie(self):
