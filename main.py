@@ -3,6 +3,7 @@ import json
 import logging
 import os
 import re
+import subprocess
 import sys
 import urllib
 
@@ -64,19 +65,6 @@ class BaseHandler(tornado.web.RequestHandler):
         if not self.authorized(action):
             raise tornado.web.HTTPError(403)
 
-    @tornado.gen.coroutine
-    def on_finish(self):
-        """Updates feeds every so often"""
-        if not hasattr(self, 'feeds_last_updated'):
-            self.feeds_updated = datetime.datetime.now()
-        last_updated = (self.feeds_updated - datetime.datetime.now()).seconds
-        if last_updated > 360 * 2:
-            try:
-                yield db.feeds_update()
-            except Exception as e:
-                logging.error(e)            
-            self.feeds_updated = datetime.datetime.now()
-        
     def reload(self, save_form=False, message=None):
         if save_form:
             data = {}
@@ -505,7 +493,9 @@ class Feeds(BaseHandler):
 
 class WebHook(BaseHandler):
     def post(self):
+        # TODO: add hash verification
         logging.info(str(self.request))
+        subprocess.call('git pull && sudo restart nohuck', shell=True)
         self.write('1')
 
 
@@ -529,22 +519,25 @@ routes = [
 ]
 
 config = {
-    'template_path': os.path.join(os.path.dirname(__file__), 'templates'),
-    'static_path': os.path.join(os.path.dirname(__file__), 'static'),
+    'template_path': 'templates',
+    'static_path': 'static',
     'xsrf_cookies': True,
+    'debug': True,
     'cookie_secret': settings['cookie_secret'],
     'login_url': '/login'
 }
 
 
 if __name__ == '__main__':
+    logging.getLogger().setLevel(logging.INFO)
     if 'prod' in sys.argv:
         logging.getLogger().setLevel(logging.ERROR)
+        config['debug'] = False
+    if 'cron' in sys.argv:
+        tornado.ioloop.IOLoop.instance().run_sync(db.feeds_update)
     else:
-        logging.getLogger().setLevel(logging.INFO)
-        config['debug'] = True
-    app = tornado.web.Application(routes, **config)
-    app.listen(7000, address='127.0.0.1', xheaders=True)
-    tornado.ioloop.IOLoop.current().start()
+        app = tornado.web.Application(routes, **config)
+        app.listen(7000, address='127.0.0.1', xheaders=True)
+        tornado.ioloop.IOLoop.current().start()
 
 
