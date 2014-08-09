@@ -1,14 +1,11 @@
 # Nohuck.com
 
-Working on porting it out of appengine.
-
 
 ## TODO
 
-### Python 3 Future support
-
-- Waiting on rethinkdb driver
-- `python3 -m pip install tornado --user`
+- Rethinkdb driver is blocking - slows down the server quite a bit
+- Python 3 support (waiting on rethinkdb driver)
+    - `python3 -m pip install tornado --user`
 
 
 ## API Scraps
