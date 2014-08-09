@@ -503,6 +503,12 @@ class Feeds(BaseHandler):
         self.reload(message='Feeds updated')
 
 
+class WebHook(BaseHandler):
+    def post(self):
+        logging.info(str(self.request))
+        self.write('1')
+
+
 
 routes = [
     (r'/', Index),
@@ -513,6 +519,7 @@ routes = [
     (r'/submit', AddOrEditVideo),
     (r'/about', About),
     (r'/feeds', Feeds),
+    (r'/_webhook', WebHook),
     (r'/tags', Tags),
     (r'/tags/(?P<tag_slug>[^\/]+)/(?P<id>\d+)', Video),
     (r'/tags/(?P<tag_slug>[^\/]+)/(?P<id>\d+)/edit', AddOrEditVideo),
