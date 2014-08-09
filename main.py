@@ -440,7 +440,7 @@ class AddOrEditVideo(BaseHandler):
             if not video:
                 raise tornado.web.HTTPError(404)
             video.update(params)
-            video.put()
+            db.video_save(video)
         else:
             dupes = db.videos_fetch_by_ids(video_ids)
             if dupes:
