@@ -16,19 +16,6 @@ db = r.db('nohuck')
 utc = r.make_timezone('00:00')
 
 
-def clean_comments():
-    for comment in db.table('comments').run():
-        id = comment['id']
-        if 'group' in comment:
-            del comment['group']
-        if 'user' in comment:
-            del comment['user']
-        comment['id'] = generate_id()
-        print db.table('comments').insert(comment).run()
-        print db.table('comments').get(id).delete().run()
-
-
-
 ### Settings ###
 def settings_create():
     #db.table_create('settings').run()
