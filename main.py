@@ -491,13 +491,15 @@ class Feeds(BaseHandler):
         self.reload(message='Feeds updated')
 
 
-class WebHook(BaseHandler):
+class GitHubHook(BaseHandler):
     def post(self):
         # TODO: add hash verification
         logging.info(str(self.request))
         subprocess.call('git pull && sudo restart nohuck', shell=True)
         self.write('1')
-
+    
+    def check_xsrf_cookie(self):
+        # Skip xsrf check
 
 
 routes = [
@@ -509,7 +511,7 @@ routes = [
     (r'/submit', AddOrEditVideo),
     (r'/about', About),
     (r'/feeds', Feeds),
-    (r'/_webhook', WebHook),
+    (r'/_webhook', GitHubHook),
     (r'/tags', Tags),
     (r'/tags/(?P<tag_slug>[^\/]+)/(?P<id>\d+)', Video),
     (r'/tags/(?P<tag_slug>[^\/]+)/(?P<id>\d+)/edit', AddOrEditVideo),
