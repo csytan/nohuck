@@ -59,7 +59,7 @@ def user_create(username, password):
     username = ''.join(c for c in username.lower()[:20] if c.isalnum() or c in '-_')
     user = {
         'id': username,
-        'created': datetime.datetime.now(),
+        'created': datetime.datetime.now(utc),
         'password': user_hash_password(password),
         'about': 'Nothing here yet.',
         'karma': 1

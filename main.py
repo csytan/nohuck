@@ -458,7 +458,6 @@ class About(BaseHandler):
         self.authorize('moderate')
         settings = db.settings_get()
         settings['motd'] = self.get_argument('motd', None)
-        settings['tagline'] = self.get_argument('tagline', None)
         settings['about'] = self.get_argument('about', None)
         db.settings_save(settings)
         self.reload(message="It has been done, m'lord.")
