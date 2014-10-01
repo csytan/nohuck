@@ -542,6 +542,7 @@ if __name__ == '__main__':
     else:
         app = tornado.web.Application(routes, **config)
         app.listen(7000, address='127.0.0.1', xheaders=True)
+        print('Running on localhost:7000...')
         tornado.ioloop.IOLoop.current().start()
 
 
