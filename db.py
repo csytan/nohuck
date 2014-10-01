@@ -48,7 +48,7 @@ def settings_save(settings):
 def generate_id():
     return (db.table('settings')
         .get('id_counter')
-        .update({'value': r.row['value'].add(1) }, return_vals=True)
+        .update({'value': r.row['value'].add(1) }, return_changes=True)
         .run()
         ['new_val']['value'])
 
@@ -65,7 +65,7 @@ def user_create(username, password):
         'karma': 1
     }
     return (db.table('users')
-        .insert(user, return_vals=True)
+        .insert(user, return_changes=True)
         .run()).get('new_val', None)
 
 
@@ -76,7 +76,7 @@ def user_get(username, password=None):
 def user_save(user):
     return (db.table('users')
         .get(user['id'])
-        .replace(user, return_vals=True)
+        .replace(user, return_changes=True)
         .run())['new_val']
 
 
@@ -84,7 +84,7 @@ def user_add_karma(id):
     logging.error(id)
     return logging.info(db.table('users')
         .get(id)
-        .update({'karma': r.row['karma'].add(1)}, return_vals=True)
+        .update({'karma': r.row['karma'].add(1)}, return_changes=True)
         .run()
         ['new_val']['karma'])
 
@@ -152,7 +152,7 @@ def video_save(video):
     video_update_scores(video)
     return (db.table('videos')
         .get(video['id'])
-        .replace(video, return_vals=True)
+        .replace(video, return_changes=True)
         .run())['new_val']
 
 
@@ -316,7 +316,7 @@ def feed_replace(id, feed):
         .delete()
         .run())
     return (db.table('feeds')
-        .insert(feed, return_vals=True)
+        .insert(feed, return_changes=True)
         .run())['new_val']
 
 
