@@ -351,7 +351,6 @@ class Video(BaseHandler):
         elif action == 'edit_tags':
             tags = self.get_argument('tags', '')
             tags = [self.clean_tag(t) for t in tags.split('|')]
-            tags = tags + video['tags']
             tags = list(set(t for t in tags if t))
             video['tags'] = tags
             db.video_save(video)
