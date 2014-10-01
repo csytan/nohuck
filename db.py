@@ -50,7 +50,7 @@ def generate_id():
         .get('id_counter')
         .update({'value': r.row['value'].add(1) }, return_changes=True)
         .run()
-        ['new_val']['value'])
+        ['changes'][0]['new_val']['value'])
 
 
 
@@ -66,7 +66,8 @@ def user_create(username, password):
     }
     return (db.table('users')
         .insert(user, return_changes=True)
-        .run()).get('new_val', None)
+        .run()
+        ['changes'][0]['new_val'])
 
 
 def user_get(username, password=None):
@@ -77,7 +78,8 @@ def user_save(user):
     return (db.table('users')
         .get(user['id'])
         .replace(user, return_changes=True)
-        .run())['new_val']
+        .run()
+        ['changes'][0]['new_val'])
 
 
 def user_add_karma(id):
@@ -86,7 +88,7 @@ def user_add_karma(id):
         .get(id)
         .update({'karma': r.row['karma'].add(1)}, return_changes=True)
         .run()
-        ['new_val']['karma'])
+        ['changes'][0]['new_val']['karma'])
 
 
 def user_hash_password(raw_password, n_iter=10000):
@@ -153,7 +155,8 @@ def video_save(video):
     return (db.table('videos')
         .get(video['id'])
         .replace(video, return_changes=True)
-        .run())['new_val']
+        .run()
+        ['changes'][0]['new_val'])
 
 
 def video_delete(id):
@@ -317,7 +320,8 @@ def feed_replace(id, feed):
         .run())
     return (db.table('feeds')
         .insert(feed, return_changes=True)
-        .run())['new_val']
+        .run()
+        ['changes'][0]['new_val'])
 
 
 def feed_update(id):
