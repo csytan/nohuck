@@ -1,5 +1,6 @@
-# Nohuck.com
+# Nohuck!
 
+The code for http://nohuck.com
 
 ## TODO
 
